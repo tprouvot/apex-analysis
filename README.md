@@ -22,6 +22,7 @@ $PMD_FOLDER/run.sh pmd --minimum-priority $MINIMUM_PRIORITY -d force-app -R ../c
 Then, the generated html report is parsed to extract the needed data to insert the SObject.
 
 You can re-use this report to copy it into your staticResource folder to be able to see it in Salesforce after deployment.
+<img alt="PMD Report" src="./screenshots/pmd-report.png" />
 
 ```sh
 mv PMDReport.html ./force-app/main/default/staticResources/PMDReport.html
@@ -40,6 +41,7 @@ jq
 Before deploying this fodler to salesforce, you need to update the [CustomHelpMenuSection](./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml)
 
 To do so, you can run the following script to update it based on your sfdx (already defined) org default.
+<img alt="Help Menu" src="./screenshots/help-menu.png" />
 
 ```sh
 #TODO script update file based on

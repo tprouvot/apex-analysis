@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomHelpMenuSection xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customHelpMenuItems>
+        <linkUrl>https://lake-capricorn-7550.my.salesforce.com/resource/::STATIC_RESOURCE_ID::/PMDReport?</linkUrl>
+        <masterLabel>PMD Report</masterLabel>
+        <sortOrder>1</sortOrder>
+    </customHelpMenuItems>
+    <masterLabel>Code analysis</masterLabel>
+</CustomHelpMenuSection>

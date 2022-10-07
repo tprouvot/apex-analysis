@@ -10,10 +10,10 @@ export LAST_P2
 export LAST_P3
 
 function export_PMD_variables(){
-	STR=$(<pmd-report2.html)
+	STR=$(<PMDReport.html)
 
 	PMD=$(awk -F'START_PMD_VERSION|END_PMD_VERSION' '{print $2}' <<< "$STR")
-	NB_FILES=$(awk -F'START_NB_FILES|END_NB_FILES' '{print $2}' <<< "$STR")
+	NB_FILES=$(awk -F'START_TOTAL_FILES|END_TOTAL_FILES' '{print $2}' <<< "$STR")
 	P1=$(awk -F'START_PRIORITY_1|END_PRIORITY_1' '{print $2}' <<< "$STR")
 	P2=$(awk -F'START_PRIORITY_2|END_PRIORITY_2' '{print $2}' <<< "$STR")
 	P3=$(awk -F'START_PRIORITY_3|END_PRIORITY_3' '{print $2}' <<< "$STR")
@@ -38,22 +38,19 @@ function get_last_code_analysis(){
 	then
 		echo "No result found, create new CodeAnalysis__c record"
 		create_code_analysis $org_username
+		exit 0
 	else
 		LAST_P1=$(jq -r ".result.records|map(.Priority1__c)|.[]" <<< $result)
 		LAST_P2=$(jq -r ".result.records|map(.Priority2__c)|.[]" <<< $result)
 		LAST_P3=$(jq -r ".result.records|map(.Priority3__c)|.[]" <<< $result)
 
-		if [ $LAST_P1 < $P1 ] || [ $LAST_P2 < $P2 ]
+		if [ $LAST_P1 < $P1 ] || [ $LAST_P2 < $P2 ] || [ $LAST_P3 < $P3 ]
 		then
-			echo "Number of errors increased "
+			echo "Number of errors increased : lastp1 "$LAST_P1" current "$P1", lastp2 "$LAST_P2" current "$P2",lastp3 "$LAST_P3" current "$P3
 			exit 1
 		fi
 	fi
 }
-
-#export_PMD_variables
-#create_code_analysis 'generali_SO_shape0410'
-#get_last_code_analysis 'generali_SO_shape0410'
 
 # Replace substring in file
 function replace_in_file(){
@@ -97,3 +94,12 @@ function update_help_menu_with_org_values(){
 
 	echo "End of replacement"
 }
+
+function generate_pmd_report(){
+	local pmdBin=$1
+	local minimumPriority=$2
+	local pmdRulesFile=$3
+
+	$pmdBin/run.sh pmd --minimum-priority $minimumPriority -d force-app -R $pmdRulesFile -f xslt -l apex -property xsltFilename=pmd-nicerhtml.xsl > PMDReport.html
+}
+

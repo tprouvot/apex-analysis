@@ -15,6 +15,14 @@
         <aggregateTypes>Sum</aggregateTypes>
         <field>CodeAnalysis__c.Priority3__c</field>
     </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>CodeAnalysis__c.NumberOfDuplicates__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>CodeAnalysis__c.TokensSum__c</field>
+    </columns>
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>

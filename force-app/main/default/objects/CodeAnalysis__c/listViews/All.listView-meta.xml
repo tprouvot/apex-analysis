@@ -7,6 +7,8 @@
     <columns>Priority1__c</columns>
     <columns>Priority2__c</columns>
     <columns>Priority3__c</columns>
+    <columns>NumberOfDuplicates__c</columns>
+    <columns>TokensSum__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

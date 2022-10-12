@@ -3,6 +3,11 @@
     <description>This permission set gives the create, read, update and delete rights for CodeAnalysis__c custom object</description>
     <fieldPermissions>
         <editable>true</editable>
+        <field>CodeAnalysis__c.NumberOfDuplicates__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>CodeAnalysis__c.NumberOfFiles__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -24,6 +29,16 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>CodeAnalysis__c.Version__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>CodeAnalysis__c.Token__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>CodeAnalysis__c.TokensSum__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>

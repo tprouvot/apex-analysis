@@ -59,10 +59,6 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Token__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>NumberOfDuplicates__c</field>
             </layoutItems>
         </layoutColumns>

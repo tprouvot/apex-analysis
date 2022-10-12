@@ -24,14 +24,14 @@ You can monitor technical debt on the dashboard **Technical Debt Evolution**
 ## How does it works ?
 
 The pmd rules are configured in the file [custom-apex-rules.xml](./custom-apex-rules.xml)
-To run the analysis and compare it to the previous values (or create it for the first check), run the followinf command:
+To run the analysis and compare it to the previous values (or create it for the first check), run the following command:
 ```sh
 . ./help-functions.sh && check_analyses "$orgAlias" "$pmdBinPath"
 ```
 
-Then, the generated html report is parsed to extract the needed data to insert the SObject.
+The generated reports are parsed to extract the needed data to insert the SObject.
 
-You can re-use this report to copy it into your staticResource folder to be able to see it in Salesforce after deployment.
+You can re-use the PMD report to copy it into your staticResource folder to be able to see it in Salesforce after deployment.
 
 <img alt="PMD Report" src="./screenshots/pmd-report.png" />
 

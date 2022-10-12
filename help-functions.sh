@@ -148,8 +148,9 @@ function get_last_code_analysis(){
 # Replace variables in CustomHelpMenuSection with org's values
 function update_help_menu_with_org_values(){
 	local orgAlias=$1
-	local file="./metadata/CustomHelpMenuSection.customHelpMenuSection-meta.xml"
-	#local file="./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml"
+	local file="./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml"
+
+	cp ./metadata/CustomHelpMenuSection.customHelpMenuSection-meta.xml $file
 
 	echo "Replacing values in CustomHelpMenuSection"
 	local recordId=$(get_record_id $orgAlias "SELECT Id FROM StaticResource WHERE Name='PMDReport' LIMIT 1")
@@ -159,9 +160,5 @@ function update_help_menu_with_org_values(){
 	replace_in_file "::ORG_URL::" $orgUrl $file
 
 	echo "End of replacement"
-	echo "Move customHelpMenuSection metatada to force-app folder"
-	mv $file ./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml
 }
 #### End Update metadata functions ####
-
-check_analyses "test-5bfcvse4x0h5@example.com" "/Users/tprouvot/Applications/PMD/latest/bin/"

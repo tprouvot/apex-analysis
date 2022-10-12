@@ -1,12 +1,19 @@
 # Apex Code Analysis
 This repo contains SObject and shell scripts used to persist code analysis reports summary in Salesforce.
 
+
+## Disclaimer
+Apex Code Analysis is not an official Salesforce product, it has not been officially tested or documented by Salesforce.
+## Required packages
+
+- awk
+- sed (depending on the OS you're using, you may need to adapt the sed commands to match your OS)
+- grep
+- jq
 ## Use case
 Sometimes you want to implement static code analysis but the project you're working on already contains some technical debt. If you're running the PMD command on your project, the command exit status will be a failure.
 
-With this framework, you will be able to monitor the technical debt reduction for each deployment, a
-# Disclaimer
-Apex Code Analysis is not an official Salesforce product, it has not been officially tested or documented by Salesforce.
+With this framework, you will be able to monitor the technical debt reduction for each deployment, and prevent additional debt to be added.
 
 ## How to follow technical debt ?
 
@@ -29,20 +36,9 @@ Then, the generated html report is parsed to extract the needed data to insert t
 
 You can re-use this report to copy it into your staticResource folder to be able to see it in Salesforce after deployment.
 
-```sh
-mv PMDReport.html ./force-app/main/default/staticResources/PMDReport.html
-```
-
 <img alt="PMD Report" src="./screenshots/pmd-report.png" />
 
 ## Deploy to Salesforce
-
-# Needed packages
-
-- awk
-- sed (depending on the OS you're using, you may need to adapt the sed commands to match your OS)
-- grep
-- jq
 
 
 Before deploying this fodler to salesforce, you need to update the [CustomHelpMenuSection](./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml)

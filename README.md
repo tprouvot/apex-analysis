@@ -24,12 +24,9 @@ You can monitor technical debt on the dashboard **Technical Debt Evolution**
 ## How does it works ?
 
 The pmd rules are configured in the file [custom-apex-rules.xml](./custom-apex-rules.xml)
-
-When running pmd command, we add a parameter (*xsltFilename*) to define export format and the template to use:
-
+To run the analysis and compare it to the previous values (or create it for the first check), run the followinf command:
 ```sh
-$PMD_FOLDER/run.sh pmd --minimum-priority $MINIMUM_PRIORITY -d force-app -R ../custom-apex-rules.xml -f xslt -l apex -property xsltFilename=pmd-nicerhtml.xsl > PMDReport.html
-#
+. ./help-functions.sh && check_analyses "$orgAlias" "$pmdBinPath"
 ```
 
 Then, the generated html report is parsed to extract the needed data to insert the SObject.
@@ -45,7 +42,7 @@ Before deploying this fodler to salesforce, you need to update the [CustomHelpMe
 
 To do so, you can run the following script to update it.
 ```sh
-. ./help-functions.sh && update_help_menu_with_org_values "orgAlias"
+. ./help-functions.sh && update_help_menu_with_org_values "$orgAlias"
 ```
 
 <img alt="Help Menu" src="./screenshots/help-menu.png" />

@@ -8,6 +8,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>CodeAnalysis__c.NumberOfFieldNoDesc__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>CodeAnalysis__c.NumberOfFiles__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -29,11 +34,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>CodeAnalysis__c.Version__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>CodeAnalysis__c.Token__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

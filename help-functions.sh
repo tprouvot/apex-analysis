@@ -7,6 +7,7 @@ export P2
 export P3
 export TOKEN_SUM
 export NB_DUPLICATES
+export NB_FIELD_NO_DESC
 
 
 #### PMD & CPD functions ####
@@ -53,6 +54,7 @@ function check_analyses(){
 
 	export_PMD_variables
 	export_CPD_variables
+	export_nb_fields_no_desc
 
 	local result=$(get_last_code_analysis $orgAlias)
 	echo $result
@@ -76,6 +78,16 @@ function replace_in_file(){
 	local file=$3
 
 	sed -i '' "s|${searched}|${replacedBy}|g" "$file"
+}
+
+# Count number of files which does not contains string($1) in files ($2) in folder ($3)
+function count_not_in_files(){
+	local searched=$1
+	local folder=$2
+	local fileName=$3
+
+	grep -r -L $searched $folder > $fileName
+	echo cat $fileName | sed -n '$='
 }
 
 #### End File functions ####
@@ -105,7 +117,7 @@ function get_record_id(){
 function create_code_analysis(){
 	local org_username=$1
 
-	local cmd=$(sfdx force:data:record:create --targetusername $org_username -s CodeAnalysis__c -v "NumberOfFiles__c='$NB_FILES' Version__c='$PMD' Priority1__c='$P1' Priority2__c='$P2' Priority3__c='$P3' NumberOfDuplicates__c='$NB_DUPLICATES' TokensSum__c='$TOKEN_SUM'" --json --loglevel TRACE)
+	local cmd=$(sfdx force:data:record:create --targetusername $org_username -s CodeAnalysis__c -v "NumberOfFiles__c='$NB_FILES' Version__c='$PMD' Priority1__c='$P1' Priority2__c='$P2' Priority3__c='$P3' NumberOfDuplicates__c='$NB_DUPLICATES' TokensSum__c='$TOKEN_SUM' NumberOfFieldNoDesc__c=$NB_FIELD_NO_DESC" --json --loglevel TRACE)
 	echo $cmd
 	local status=$(jq '.status' <<< $cmd)
 	echo $status
@@ -116,7 +128,7 @@ function get_last_code_analysis(){
 
 	export_PMD_variables
 
-	local result=$(sfdx force:data:soql:query --targetusername $org_username --query "SELECT Priority1__c, Priority2__c, Priority3__c, NumberOfDuplicates__c, TokensSum__c FROM CodeAnalysis__c ORDER BY CreatedDate DESC LIMIT 1" --json)
+	local result=$(sfdx force:data:soql:query --targetusername $org_username --query "SELECT Priority1__c, Priority2__c, Priority3__c, NumberOfDuplicates__c, TokensSum__c, NumberOfFieldNoDesc__c FROM CodeAnalysis__c ORDER BY CreatedDate DESC LIMIT 1" --json)
 	local nbResult=$(jq -r ".result.totalSize" <<< $result)
 
 	if [ "$nbResult" = "0" ]
@@ -143,7 +155,7 @@ function get_last_code_analysis(){
 #### End Sfdx functions ####
 
 
-#### Update metadata functions ####
+#### Metadata functions ####
 
 # Replace variables in CustomHelpMenuSection with org's values
 function update_help_menu_with_org_values(){
@@ -161,4 +173,11 @@ function update_help_menu_with_org_values(){
 
 	echo "End of replacement"
 }
+
+# Count number of fields without description
+function export_nb_fields_no_desc(){
+	NB_FIELD_NO_DESC=$(count_not_in_files "<description>" "./force-app/main/default/objects/*/fields/" "fieldsWithoutDescription.txt")
+	echo $NB_FIELD_NO_DESC
+}
+
 #### End Update metadata functions ####

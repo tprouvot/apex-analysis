@@ -17,12 +17,7 @@
                 <chartSummary>
                     <aggregate>Sum</aggregate>
                     <axisBinding>y</axisBinding>
-                    <column>CodeAnalysis__c.Priority1__c</column>
-                </chartSummary>
-                <chartSummary>
-                    <aggregate>Sum</aggregate>
-                    <axisBinding>y</axisBinding>
-                    <column>CodeAnalysis__c.Priority2__c</column>
+                    <column>CodeAnalysis__c.NumberOfFieldNoDesc__c</column>
                 </chartSummary>
                 <componentType>Line</componentType>
                 <decimalPrecision>-1</decimalPrecision>
@@ -38,8 +33,8 @@
                         <sortOrder>a</sortOrder>
                     </groupingSorts>
                 </groupingSortProperties>
-                <header>Code Analyses Evolution</header>
-                <legendPosition>Right</legendPosition>
+                <header>Number of fields without description</header>
+                <legendPosition>Bottom</legendPosition>
                 <report>CodeAnalysis/CodeAnalysesReport</report>
                 <showPercentage>false</showPercentage>
                 <showValues>false</showValues>
@@ -120,7 +115,7 @@
                         <sortOrder>d</sortOrder>
                     </groupingSorts>
                 </groupingSortProperties>
-                <header>CPD Sum of duplicates found</header>
+                <header>CPD Number of duplicates</header>
                 <legendPosition>Bottom</legendPosition>
                 <report>CodeAnalysis/CodeAnalysesReport</report>
                 <showPercentage>false</showPercentage>
@@ -157,7 +152,7 @@
                         <sortOrder>a</sortOrder>
                     </groupingSorts>
                 </groupingSortProperties>
-                <header>CPD Sum of tokens</header>
+                <header>CPD Token sum of duplicates</header>
                 <legendPosition>Bottom</legendPosition>
                 <report>CodeAnalysis/CodeAnalysesReport</report>
                 <showPercentage>false</showPercentage>

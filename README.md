@@ -16,6 +16,7 @@ Sometimes you want to implement static code analysis but the project you're work
 With this framework, you will be able to monitor the technical debt reduction for each deployment, and prevent additional debt to be added.
 
 <img alt="CodeAnalysis__c" src="./screenshots/object.png" />
+
 ## How to follow technical debt ?
 
 You can monitor technical debt on the dashboard **Technical Debt Evolution**

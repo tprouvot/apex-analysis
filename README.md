@@ -26,6 +26,7 @@ You can monitor technical debt on the dashboard **Technical Debt Evolution**
 ## How does it works ?
 
 The pmd rules are configured in the file [custom-apex-rules.xml](./custom-apex-rules.xml)
+
 To run the analysis and compare it to the previous values (or create it for the first check), run the following command:
 ```sh
 . ./help-functions.sh && check_analyses "$orgAlias" "$pmdBinPath"

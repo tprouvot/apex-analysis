@@ -142,10 +142,11 @@ function get_last_code_analysis(){
 		LAST_P3=$(jq -r ".result.records|map(.Priority3__c)|.[]" <<< $result)
 		LAST_NB_DUP=$(jq -r ".result.records|map(.NumberOfDuplicates__c)|.[]" <<< $result)
 		LAST_TOKENS_SUM=$(jq -r ".result.records|map(.TokensSum__c)|.[]" <<< $result)
+		LAST_NB_FIELD_NO_DESC=$(jq -r ".result.records|map(.NumberOfFieldNoDesc__c)|.[]" <<< $result)
 
 		if [ "$LAST_P1" -lt "$P1" ] || [ "$LAST_P2" -lt "$P2" ] || [ "$LAST_P3" -lt "$P3" ] || [ "$LAST_NB_DUP" -lt "$NB_DUPLICATES" ]
 		then
-			echo "Number of errors increased : lastp1 "$LAST_P1" current "$P1", lastp2 "$LAST_P2" current "$P2",lastp3 "$LAST_P3" current "$P3", last nb duplicates "$LAST_NB_DUP" current "$NB_DUPLICATES
+			echo "ERROR: Technical debt increased (lastp1 "$LAST_P1" new "$P1", lastp2 "$LAST_P2" new "$P2",lastp3 "$LAST_P3" new "$P3", last nb duplicates "$LAST_NB_DUP" new "$NB_DUPLICATES", last nb fields without description "$NB_DUPLICATES" new "$LAST_NB_FIELD_NO_DESC")"
 		else
 			echo 0
 		fi

@@ -41,11 +41,15 @@ You can re-use the PMD report to copy it into your staticResource folder to be a
 ## Deploy to Salesforce
 
 
-Before deploying this fodler to salesforce, you need to update the [CustomHelpMenuSection](./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml)
+Before deploying this project to salesforce, we need to update the some metadata to match with your org and username context
+- Report and Dashboard : contains username and must exist in your org.
+- CustomHelpMenuSection : contains org url and must be updated with yours.
 
 To do so, you can run the following script to update it.
+- "orgAlias" parameter must be replaced by your org alias or username
+- "usernameToUseInReport" parameter must be replaced by the username you want to reference in the report and dashboard
 ```sh
-. ./help-functions.sh && update_help_menu_with_org_values "$orgAlias"
+. ./help-functions.sh && update_meta_with_org_values "orgAlias" "usernameToUseInReport"
 ```
 
 <img alt="Help Menu" src="./screenshots/help-menu.png" />
@@ -55,7 +59,3 @@ Checkout the repo and deploy it with sfdx:
 ```sh
 sfdx force:source:deploy -p force-app
 ```
-
-Use GitHub Salesforce Deploy Tool:
-
-[<img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png" />](https://githubsfdeploy.herokuapp.com/?owner=tprouvot&repo=apex-analysis&ref=main)

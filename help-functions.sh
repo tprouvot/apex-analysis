@@ -29,8 +29,8 @@ function generate_cpd_report(){
 function export_PMD_variables(){
 	STR=$(<PMDReport.html)
 
-	PMD=$(awk -F'START_PMD_VERSION|END_PMD_VERSION' '{print $2}' <<< "$STR")
-	NB_FILES=$(awk -F'START_TOTAL_FILES|END_TOTAL_FILES' '{print $2}' <<< "$STR")
+	PMD=$(awk -F'START_PMD_VERSION|END_PMD_VERSION' '{print $2}' <<< "$STR" | tr -d '\n')
+	NB_FILES=$(awk -F'START_TOTAL_FILES|END_TOTAL_FILES' '{print $2}' <<< "$STR" | tr -d '\n')
 
 	P1=$(awk -F'START_PRIORITY_1|END_PRIORITY_1' '{print $2}' <<< "$STR" | tr -d '\n')
 	P2=$(awk -F'START_PRIORITY_2|END_PRIORITY_2' '{print $2}' <<< "$STR" | tr -d '\n')
@@ -40,9 +40,18 @@ function export_PMD_variables(){
 function export_CPD_variables(){
 	#count number of lines excluding the csv header
 	NB_DUPLICATES=$(cat cpd.csv | tail +2 | sed -n '$=')
+	if [ -z "$NB_DUPLICATES" ]
+	then
+		NB_DUPLICATES=0
+	fi
 
 	#extract and sum first column of csv and exclude the csv header
 	TOKEN_SUM=$(cat cpd.csv | tail +2 | awk -F , '{print $1}' | xargs | sed -e 's/\ /+/g' | bc)
+	echo $TOKEN_SUM
+	if [ -z "$TOKEN_SUM" ]
+	then
+		TOKEN_SUM=0
+	fi
 }
 
 function check_analyses(){
@@ -61,8 +70,6 @@ function check_analyses(){
 
 	if [[ $result == "0" ]]; then
 			echo "PMD & CPD checks suceedeed"
-	else
-			echo "KO "$result
 	fi
 }
 
@@ -86,8 +93,13 @@ function count_not_in_files(){
 	local folder=$2
 	local fileName=$3
 
-	grep -r -L $searched $folder > $fileName
-	echo cat $fileName | sed -n '$='
+	if [ -d "$searched $folder" ];
+	then
+		grep -r -L $searched $folder > $fileName
+		echo cat $fileName | sed -n '$='
+	else
+		echo "0"
+	fi
 }
 
 #### End File functions ####
@@ -116,11 +128,16 @@ function get_record_id(){
 
 function create_code_analysis(){
 	local org_username=$1
+	local TODAY=$(date +'%Y-%m-%d')
 
-	local cmd=$(sfdx force:data:record:create --targetusername $org_username -s CodeAnalysis__c -v "NumberOfFiles__c='$NB_FILES' Version__c='$PMD' Priority1__c='$P1' Priority2__c='$P2' Priority3__c='$P3' NumberOfDuplicates__c='$NB_DUPLICATES' TokensSum__c='$TOKEN_SUM' NumberOfFieldNoDesc__c=$NB_FIELD_NO_DESC" --json --loglevel TRACE)
+	echo "NumberOfFiles__c,Version__c,Priority1__c,Priority2__c,Priority3__c,NumberOfDuplicates__c,TokensSum__c,NumberOfFieldNoDesc__c,DeploymentDate__c"  > codeAnalysis.csv
+	echo "$NB_FILES, $PMD, $P1, $P2, $P3, $NB_DUPLICATES, $TOKEN_SUM, $NB_FIELD_NO_DESC, $TODAY" >> codeAnalysis.csv
+
+	local cmd=$(sfdx force:data:bulk:upsert --targetusername $org_username -s CodeAnalysis__c -i DeploymentDate__c -f codeAnalysis.csv --json --loglevel TRACE -w 3)
 	echo $cmd
-	local status=$(jq '.status' <<< $cmd)
-	echo $status
+
+	#Delete generated csv
+	rm codeAnalysis.csv
 }
 
 function get_last_code_analysis(){
@@ -158,12 +175,32 @@ function get_last_code_analysis(){
 
 #### Metadata functions ####
 
+function update_meta_with_org_values(){
+	local orgAlias=$1
+	local usernameForReports=$2
+	update_help_menu_with_org_values $orgAlias
+	update_report_dashboard_with_current_username $orgAlias $usernameForReports
+}
+
+function update_report_dashboard_with_current_username(){
+	local orgAlias=$1
+	local usernameForReports=$2
+
+	echo "Update Report and Dashboard to match with your user"
+	replace_in_file "myusername@apex-analysis.com" $usernameForReports "./force-app/main/default/reports/CodeAnalysis.reportFolder-meta.xml"
+	replace_in_file "myusername@apex-analysis.com" $usernameForReports "./force-app/main/default/dashboards/CodeAnalysis/uPzNCsbXfPrMAjnJxBjpTKvGRODlGf1.dashboard-meta.xml"
+	replace_in_file "myusername@apex-analysis.com" $usernameForReports "./force-app/main/default/dashboards/CodeAnalysis.dashboardFolder-meta.xml"
+}
+
 # Replace variables in CustomHelpMenuSection with org's values
 function update_help_menu_with_org_values(){
 	local orgAlias=$1
 	local file="./force-app/main/default/customHelpMenuSections/CustomHelpMenuSection.customHelpMenuSection-meta.xml"
 
 	cp ./metadata/CustomHelpMenuSection.customHelpMenuSection-meta.xml $file
+
+	echo "Deploying 'PMDReport' StaticResource"
+	sfdx force:source:deploy -p ./force-app/main/default/staticresources
 
 	echo "Replacing values in CustomHelpMenuSection"
 	local recordId=$(get_record_id $orgAlias "SELECT Id FROM StaticResource WHERE Name='PMDReport' LIMIT 1")

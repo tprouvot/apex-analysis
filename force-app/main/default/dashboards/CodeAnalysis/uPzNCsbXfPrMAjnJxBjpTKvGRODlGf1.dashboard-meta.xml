@@ -168,9 +168,9 @@
     </dashboardGridLayout>
     <dashboardType>SpecifiedUser</dashboardType>
     <isGridLayout>true</isGridLayout>
-    <runningUser>test-5bfcvse4x0h5@example.com</runningUser>
+    <runningUser>myusername@apex-analysis.com</runningUser>
     <textColor>#000000</textColor>
-    <title>Technical Debt Evolution</title>
+    <title>Apex Technical Debt Evolution</title>
     <titleColor>#000000</titleColor>
     <titleSize>12</titleSize>
 </Dashboard>

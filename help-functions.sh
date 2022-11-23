@@ -1,6 +1,8 @@
 #!/bin/sh
 
 export PMD
+export PMD_MINIMUM_PRIORITY
+export CPD_MINIMUM_TOKEN
 export NB_FILES
 export P1
 export P2
@@ -16,17 +18,22 @@ function generate_pmd_report(){
 	local minimumPriority=$2
 	local pmdRulesFile=$3
 
-	$pmdBin/run.sh pmd --minimum-priority $minimumPriority -d force-app -R $pmdRulesFile -f xslt -l apex --property xsltFilename=pmd-nicerhtml.xsl > PMDReport.html
+	echo "Generate PMD report"
+	local pmdcmd=$($pmdBin/run.sh pmd --minimum-priority $minimumPriority -d ./force-app -R $pmdRulesFile -f xslt -l apex --property xsltFilename=pmd-nicerhtml.xsl > PMDReport.html)
+	echo "PMD report generated"
 }
 
 function generate_cpd_report(){
 	local pmdBin=$1
 	local minimumToken=$2
 
-	$pmdBin/run.sh cpd --minimum-tokens $minimumToken --files ./force-app/main/default --language apex --format csv_with_linecount_per_file > cpd.csv
+	echo "Generate CPD report"
+	local cpdcmd=$($pmdBin/run.sh cpd --minimum-tokens $minimumToken --files ./force-app/main/default --language apex --format csv_with_linecount_per_file > cpd.csv)
+	echo "CPD report generated"
 }
 
 function export_PMD_variables(){
+	echo "Export PMD variables from report"
 	STR=$(<PMDReport.html)
 
 	PMD=$(awk -F'START_PMD_VERSION|END_PMD_VERSION' '{print $2}' <<< "$STR" | tr -d '\n')
@@ -38,6 +45,7 @@ function export_PMD_variables(){
 }
 
 function export_CPD_variables(){
+	echo "Export CPD variables from report"
 	#count number of lines excluding the csv header
 	NB_DUPLICATES=$(cat cpd.csv | tail +2 | sed -n '$=')
 	if [ -z "$NB_DUPLICATES" ]
@@ -47,7 +55,6 @@ function export_CPD_variables(){
 
 	#extract and sum first column of csv and exclude the csv header
 	TOKEN_SUM=$(cat cpd.csv | tail +2 | awk -F , '{print $1}' | xargs | sed -e 's/\ /+/g' | bc)
-	echo $TOKEN_SUM
 	if [ -z "$TOKEN_SUM" ]
 	then
 		TOKEN_SUM=0
@@ -57,19 +64,26 @@ function export_CPD_variables(){
 function check_analyses(){
 	local orgAlias=$1
 	local pmdBin=$2
+	PMD_MINIMUM_PRIORITY=$3
+	CPD_MINIMUM_TOKEN=$4
 
-	generate_pmd_report $pmdBin "2" "custom-apex-rules.xml"
-	generate_cpd_report $pmdBin "65"
+	generate_pmd_report $pmdBin $PMD_MINIMUM_PRIORITY "custom-apex-rules.xml"
+	generate_cpd_report $pmdBin $CPD_MINIMUM_TOKEN
 
 	export_PMD_variables
 	export_CPD_variables
 	export_nb_fields_no_desc
 
-	local result=$(get_last_code_analysis $orgAlias)
-	echo $result
 
-	if [[ $result == "0" ]]; then
-			echo "PMD & CPD checks suceedeed"
+	echo "Get last CodeAnalysis__c record"
+	local result=$(get_last_code_analysis $orgAlias)
+
+	if [[ $result == ERROR* ]]; then
+		echo "PMD & CPD checks failed: "$result
+		exit 1
+	else
+		echo "PMD & CPD checks suceedeed"
+		exit 0
 	fi
 }
 
@@ -85,21 +99,6 @@ function replace_in_file(){
 	local file=$3
 
 	sed -i '' "s|${searched}|${replacedBy}|g" "$file"
-}
-
-# Count number of files which does not contains string($1) in files ($2) in folder ($3)
-function count_not_in_files(){
-	local searched=$1
-	local folder=$2
-	local fileName=$3
-
-	if [ -d "$searched $folder" ];
-	then
-		grep -r -L $searched $folder > $fileName
-		echo cat $fileName | sed -n '$='
-	else
-		echo "0"
-	fi
 }
 
 #### End File functions ####
@@ -130,11 +129,10 @@ function create_code_analysis(){
 	local org_username=$1
 	local TODAY=$(date +'%Y-%m-%d')
 
-	echo "NumberOfFiles__c,Version__c,Priority1__c,Priority2__c,Priority3__c,NumberOfDuplicates__c,TokensSum__c,NumberOfFieldNoDesc__c,DeploymentDate__c"  > codeAnalysis.csv
-	echo "$NB_FILES, $PMD, $P1, $P2, $P3, $NB_DUPLICATES, $TOKEN_SUM, $NB_FIELD_NO_DESC, $TODAY" >> codeAnalysis.csv
+	echo "NumberOfFiles__c,Version__c,Priority1__c,Priority2__c,Priority3__c,NumberOfDuplicates__c,TokensSum__c,NumberOfFieldNoDesc__c,DeploymentDate__c,PmdMinimumPriority__c,CpdMinimumToken__c"  > codeAnalysis.csv
+	echo "$NB_FILES, $PMD, $P1, $P2, $P3, $NB_DUPLICATES, $TOKEN_SUM, $NB_FIELD_NO_DESC, $TODAY, $PMD_MINIMUM_PRIORITY, $CPD_MINIMUM_TOKEN" >> codeAnalysis.csv
 
-	local cmd=$(sfdx force:data:bulk:upsert --targetusername $org_username -s CodeAnalysis__c -i DeploymentDate__c -f codeAnalysis.csv --json --loglevel TRACE -w 3)
-	echo $cmd
+	sfdx force:data:bulk:upsert --targetusername $org_username -s CodeAnalysis__c -i DeploymentDate__c -f codeAnalysis.csv --json --loglevel TRACE -w 3
 
 	#Delete generated csv
 	rm codeAnalysis.csv
@@ -143,16 +141,12 @@ function create_code_analysis(){
 function get_last_code_analysis(){
 	local org_username=$1
 
-	export_PMD_variables
-
 	local result=$(sfdx force:data:soql:query --targetusername $org_username --query "SELECT Priority1__c, Priority2__c, Priority3__c, NumberOfDuplicates__c, TokensSum__c, NumberOfFieldNoDesc__c FROM CodeAnalysis__c ORDER BY CreatedDate DESC LIMIT 1" --json)
 	local nbResult=$(jq -r ".result.totalSize" <<< $result)
 
 	if [ "$nbResult" = "0" ]
 	then
-		echo "No result found, create new CodeAnalysis__c record"
 		create_code_analysis $org_username
-		exit 0
 	else
 		LAST_P1=$(jq -r ".result.records|map(.Priority1__c)|.[]" <<< $result)
 		LAST_P2=$(jq -r ".result.records|map(.Priority2__c)|.[]" <<< $result)
@@ -161,11 +155,11 @@ function get_last_code_analysis(){
 		LAST_TOKENS_SUM=$(jq -r ".result.records|map(.TokensSum__c)|.[]" <<< $result)
 		LAST_NB_FIELD_NO_DESC=$(jq -r ".result.records|map(.NumberOfFieldNoDesc__c)|.[]" <<< $result)
 
-		if [ "$LAST_P1" -lt "$P1" ] || [ "$LAST_P2" -lt "$P2" ] || [ "$LAST_P3" -lt "$P3" ] || [ "$LAST_NB_DUP" -lt "$NB_DUPLICATES" ]
+		if [ "$P1" -le "$LAST_P1" ] && [ "$P2" -le "$LAST_P2" ] && [ "$P3" -le "$LAST_P3" ] && [ "$NB_DUPLICATES" -le "$LAST_NB_DUP" ] && [ "$NB_FIELD_NO_DESC" -le "$LAST_NB_FIELD_NO_DESC" ]
 		then
-			echo "ERROR: Technical debt increased (lastp1 "$LAST_P1" new "$P1", lastp2 "$LAST_P2" new "$P2",lastp3 "$LAST_P3" new "$P3", last nb duplicates "$LAST_NB_DUP" new "$NB_DUPLICATES", last nb fields without description "$NB_DUPLICATES" new "$LAST_NB_FIELD_NO_DESC")"
+			echo "OK"
 		else
-			echo 0
+			echo "ERROR: Technical debt increased (lastp1 "$LAST_P1" new "$P1", lastp2 "$LAST_P2" new "$P2",lastp3 "$LAST_P3" new "$P3", last nb duplicates "$LAST_NB_DUP" new "$NB_DUPLICATES", last nb fields without description "$NB_FIELD_NO_DESC" new "$LAST_NB_FIELD_NO_DESC")"
 		fi
 	fi
 }
@@ -214,8 +208,12 @@ function update_help_menu_with_org_values(){
 
 # Count number of fields without description
 function export_nb_fields_no_desc(){
-	NB_FIELD_NO_DESC=$(count_not_in_files "<description>" "./force-app/main/default/objects/*/fields/" "fieldsWithoutDescription.txt")
-	echo $NB_FIELD_NO_DESC
+	echo "Export number of fields without description variable"
+	local fileName=fieldsWithoutDescription.txt
+
+	grep -r -L "<description>" ./force-app/main/default/objects/*/fields/ > $fileName
+
+	NB_FIELD_NO_DESC=$(cat $fileName | sed -n '$=')
 }
 
 #### End Update metadata functions ####

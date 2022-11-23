@@ -31,6 +31,10 @@
         <label>PMD</label>
         <layoutColumns>
             <layoutItems>
+                <behavior>Edit</behavior>
+                <field>PmdMinimumPriority__c</field>
+            </layoutItems>
+            <layoutItems>
                 <behavior>Required</behavior>
                 <field>DeploymentDate__c</field>
             </layoutItems>
@@ -44,6 +48,9 @@
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
+            <layoutItems>
+                <emptySpace>true</emptySpace>
+            </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>NumberOfFiles__c</field>
@@ -67,10 +74,17 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>CpdMinimumToken__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>NumberOfDuplicates__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
+            <layoutItems>
+                <emptySpace>true</emptySpace>
+            </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>TokensSum__c</field>
@@ -113,7 +127,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h5r000001zZpF</masterLabel>
+        <masterLabel>00h7Q00000GTLrI</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>

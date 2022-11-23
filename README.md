@@ -46,10 +46,13 @@ Before deploying this project to salesforce, we need to update the some metadata
 - CustomHelpMenuSection : contains org url and must be updated with yours.
 
 To do so, you can run the following script to update it.
-- "orgAlias" parameter must be replaced by your org alias or username
-- "usernameToUseInReport" parameter must be replaced by the username you want to reference in the report and dashboard
+- "orgAlias" parameter must be replaced by your org alias or username.
+- "usernameToUseInReport" parameter must be replaced by the username you want to reference in the report and dashboard.
+- "pmdMinimumPriority" Rule priority threshold; rules with lower priority than configured here won't be used.
+- "cpdToken" the minimum token length which should be reported as a duplicate.
+
 ```sh
-. ./help-functions.sh && update_meta_with_org_values "orgAlias" "usernameToUseInReport"
+. ./help-functions.sh && update_meta_with_org_values "orgAlias" "usernameToUseInReport" "pmdMinimumPriority" "cpdToken"
 ```
 
 <img alt="Help Menu" src="./screenshots/help-menu.png" />
